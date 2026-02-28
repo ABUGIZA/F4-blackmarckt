@@ -79,12 +79,6 @@ Important options:
 - product list and categories
 - inventory image base URLs
 
-## Development Notes
-
-- Do not upload `ui/node_modules` to GitHub.
-- `.gitignore` is configured to exclude heavy development folders.
-- Commit `ui/build` so users can run the resource directly without rebuilding.
-
 ## Resource Files
 
 - `fxmanifest.lua`
