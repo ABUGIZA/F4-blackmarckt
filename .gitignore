@@ -1,0 +1,13 @@
+# Dependencies
+ui/node_modules/
+
+# SvelteKit build cache
+ui/.svelte-kit/
+
+# IDE
+.vscode/
+*.code-workspace
+
+# OS
+Thumbs.db
+.DS_Store
