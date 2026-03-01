@@ -1,1 +1,0 @@
-import{r as o}from"../chunks/aqsbprLm.js";import{b as e}from"../chunks/aB0CahYh.js";import"../chunks/Bzak7iHL.js";import"../chunks/C2cOQi77.js";function r(){throw o(307,`${e}/market`)}const m=Object.freeze(Object.defineProperty({__proto__:null,load:r},Symbol.toStringTag,{value:"Module"}));function c(t){}export{c as component,m as universal};
