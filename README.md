@@ -39,15 +39,8 @@ Modern FiveM black market resource with NUI interface, delivery flow, reputation
 1. Place folder in your resources directory.
 2. Import SQL file:
    - `f4_blackmarket.sql`
-3. Build the UI (first time or after UI edits):
 
-```bash
-cd ui
-npm install
-npm run build
-```
-
-4. Ensure load order in `server.cfg`:
+3. Ensure load order in `server.cfg`:
 
 ```cfg
 ensure ox_lib
