@@ -10,6 +10,14 @@ Modern FiveM black market resource with NUI interface, delivery flow, reputation
 ![Preview 4](https://i.ibb.co/Xr5vkRnF/image.png)
 ![Preview 5](https://i.ibb.co/rfkv8B0n/image.png)
 
+## Update: Black Money Payment
+
+Added `black_money` as a third payment method. Players can now choose between regular money (bank/cash) or black money when purchasing items.
+
+![Black Money Header](https://i.ibb.co/3YyPcTnf/3.png)
+![Payment Selection](https://i.ibb.co/G3phg6Sn/2.png)
+![Cart Checkout](https://i.ibb.co/sdYDFr8B/1.png)
+
 ## Supported Frameworks
 
 - `qbx_core` + `ox_inventory`
