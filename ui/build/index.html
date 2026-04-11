@@ -9,33 +9,43 @@
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
 		rel="stylesheet">
 	<title>Black Market</title>
-	<link href="./_app/immutable/entry/start.-SdK-JEm.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/D_TGmWF9.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/47fdkrGt.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/aB0CahYh.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/D-FwePQM.js" rel="modulepreload">
-		<link href="./_app/immutable/entry/app.BJ4IHIXZ.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/Dqvh30B-.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/lVVp_sVz.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/Bzak7iHL.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/B8Do-gw0.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/Dl8Oiv6a.js" rel="modulepreload">
+	<link href="./_app/immutable/entry/start.eS16gN5P.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/B79LhwMj.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/Dm7ASfoW.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/D8cf-wX1.js" rel="modulepreload">
+		<link href="./_app/immutable/entry/app.DJG-kGCO.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/CtBfFWNH.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DsJeSRyW.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DBry5Cao.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/C6tg42TU.js" rel="modulepreload">
 		
 </head>
 
 <body data-sveltekit-preload-data="hover">
+	<script>
+		// FiveM NUI fix: normalize URL so SvelteKit router can match routes.
+		// NUI opens /ui/build/index.html but router expects /ui/build/ for root route.
+		(function() {
+			var p = location.pathname;
+			if (p.endsWith('/index.html')) {
+				history.replaceState(null, '', p.slice(0, -10));
+			} else if (p.endsWith('.html')) {
+				history.replaceState(null, '', p.slice(0, -5));
+			}
+		})();
+	</script>
 	<div>
 			<script>
 				{
-					__sveltekit_14dsoz8 = {
+					__sveltekit_1uujn4l = {
 						base: new URL(".", location).pathname.slice(0, -1)
 					};
 
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.-SdK-JEm.js"),
-						import("./_app/immutable/entry/app.BJ4IHIXZ.js")
+						import("./_app/immutable/entry/start.eS16gN5P.js"),
+						import("./_app/immutable/entry/app.DJG-kGCO.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element);
 					});

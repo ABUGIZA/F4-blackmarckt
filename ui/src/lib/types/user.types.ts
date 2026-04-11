@@ -9,6 +9,7 @@ export interface UserState {
 	currentLevel: number;
 	discountPercent: number;
 	balance: number;
+	blackMoney: number;
 }
 
 export interface UserProgress {

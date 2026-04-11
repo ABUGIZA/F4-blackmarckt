@@ -10,11 +10,13 @@
 
     interface Props {
         onBack: () => void;
-        onCheckout: () => void;
+        onCheckout: (paymentMethod: 'normal' | 'black_money') => void;
         isCheckingOut?: boolean;
     }
 
     let { onBack, onCheckout, isCheckingOut = false }: Props = $props();
+
+    let paymentMethod = $state<'normal' | 'black_money'>('normal');
 
     const handleQuantityChange = (productId: string, delta: number) => {
         cart.updateQuantity(productId, delta);
@@ -26,7 +28,7 @@
 
     const handleCheckout = () => {
         if ($cart.length === 0 || isCheckingOut) return;
-        onCheckout();
+        onCheckout(paymentMethod);
     };
 
     // Before Discount = strict sum of base prices
@@ -48,6 +50,10 @@
     // After Discount = Before Discount - Discount
     const cartFinalTotal = $derived.by(() =>
         calculateDiscountedTotal(cartListTotal, $userState.discountPercent),
+    );
+
+    const activeBalance = $derived.by(() =>
+        paymentMethod === 'black_money' ? $userState.blackMoney : $userState.balance,
     );
 </script>
 
@@ -209,6 +215,27 @@
 
                 {#snippet footer()}
                     <div class="checkout-actions">
+                        <div class="payment-method-selector">
+                            <span class="payment-label">PAYMENT METHOD</span>
+                            <div class="payment-options">
+                                <button
+                                    class="payment-option"
+                                    class:active={paymentMethod === 'normal'}
+                                    onclick={() => (paymentMethod = 'normal')}
+                                >
+                                    <span class="payment-option-name">Cash / Bank</span>
+                                    <span class="payment-option-balance">${$userState.balance.toLocaleString()}</span>
+                                </button>
+                                <button
+                                    class="payment-option black-money"
+                                    class:active={paymentMethod === 'black_money'}
+                                    onclick={() => (paymentMethod = 'black_money')}
+                                >
+                                    <span class="payment-option-name">Black Money</span>
+                                    <span class="payment-option-balance">${$userState.blackMoney.toLocaleString()}</span>
+                                </button>
+                            </div>
+                        </div>
                         <Button
                             variant="primary"
                             class="checkout-btn"
@@ -219,9 +246,9 @@
                         </Button>
                         <p class="balance-hint">
                             Remaining Balance: <span
-                                class:low={$userState.balance < cartFinalTotal}
+                                class:low={activeBalance < cartFinalTotal}
                                 >${(
-                                    $userState.balance - cartFinalTotal
+                                    activeBalance - cartFinalTotal
                                 ).toLocaleString()}</span
                             >
                         </p>
@@ -486,6 +513,72 @@
     .total-val {
         color: var(--accent-primary);
         font-weight: 700;
+    }
+
+    .payment-method-selector {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .payment-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    .payment-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .payment-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.6rem 0.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--line-soft);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-muted);
+    }
+
+    .payment-option:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .payment-option.active {
+        border-color: var(--accent-primary);
+        background: rgba(24, 213, 143, 0.06);
+        color: var(--text-main);
+    }
+
+    .payment-option.black-money.active {
+        border-color: #a78bfa;
+        background: rgba(139, 92, 246, 0.08);
+    }
+
+    .payment-option-name {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .payment-option-balance {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--accent-primary);
+    }
+
+    .payment-option.black-money .payment-option-balance {
+        color: #a78bfa;
     }
 
     .checkout-actions {

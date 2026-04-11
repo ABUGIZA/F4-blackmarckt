@@ -51,6 +51,7 @@ ensure qbx_core
 ensure ox_inventory
 # or
 # ensure qb-core
+
 # ensure qb-inventory
 
 ensure F4-blackmarckt

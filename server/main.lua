@@ -222,7 +222,54 @@ local function getCitizenId(player)
     return player.PlayerData.citizenid
 end
 
+local function getBlackMoney(source)
+    local slots = exports.ox_inventory:Search(source, 'slots', Config.BlackMoney.item)
+    if not slots then return 0 end
+
+    local total = 0
+    for _, slot in ipairs(slots) do
+        total = total + (tonumber(slot.metadata and slot.metadata.type) or 0)
+    end
+    return total
+end
+
+local function removeBlackMoney(source, amount)
+    local slots = exports.ox_inventory:Search(source, 'slots', Config.BlackMoney.item)
+    if not slots then return false end
+
+    local remaining = amount
+    for _, slot in ipairs(slots) do
+        if remaining <= 0 then break end
+        local val = tonumber(slot.metadata and slot.metadata.type) or 0
+        if val <= 0 then
+            -- skip
+        elseif val <= remaining then
+            exports.ox_inventory:RemoveItem(source, Config.BlackMoney.item, slot.count, nil, slot.slot)
+            remaining = remaining - val
+        else
+            exports.ox_inventory:SetMetadata(source, slot.slot, { type = val - remaining })
+            remaining = 0
+        end
+    end
+    return remaining <= 0
+end
+
+local function addBlackMoney(source, amount)
+    local slots = exports.ox_inventory:Search(source, 'slots', Config.BlackMoney.item)
+    if slots and #slots > 0 then
+        local slot = slots[1]
+        local current = tonumber(slot.metadata and slot.metadata.type) or 0
+        exports.ox_inventory:SetMetadata(source, slot.slot, { type = current + amount })
+        return true
+    end
+    return exports.ox_inventory:AddItem(source, Config.BlackMoney.item, 1, { type = amount }) ~= false
+end
+
 local function getMoney(source, account)
+    if account == 'black_money' then
+        return getBlackMoney(source)
+    end
+
     local player = getPlayer(source)
     if not player or not player.PlayerData or not player.PlayerData.money then
         return 0
@@ -232,6 +279,10 @@ local function getMoney(source, account)
 end
 
 local function removeMoney(source, account, amount, reason)
+    if account == 'black_money' then
+        return removeBlackMoney(source, amount)
+    end
+
     local player = getPlayer(source)
     if not player or not player.Functions then
         return false
@@ -241,6 +292,10 @@ local function removeMoney(source, account, amount, reason)
 end
 
 local function addMoney(source, account, amount, reason)
+    if account == 'black_money' then
+        return addBlackMoney(source, amount)
+    end
+
     local player = getPlayer(source)
     if not player or not player.Functions then
         return false
@@ -320,7 +375,16 @@ local function addItem(source, itemName, amount, metadata)
     return false, 'unsupported_framework'
 end
 
-local function takeSmartPayment(source, amount)
+local function takeSmartPayment(source, amount, paymentMethod)
+    if paymentMethod == 'black_money' then
+        if getMoney(source, 'black_money') >= amount then
+            if removeMoney(source, 'black_money', amount, Config.Payment.reason) then
+                return true, 'black_money'
+            end
+        end
+        return false, nil
+    end
+
     for i = 1, #Config.Payment.priority do
         local account = Config.Payment.priority[i]
         if getMoney(source, account) >= amount then
@@ -586,6 +650,7 @@ local function buildSnapshot(source, citizenid)
     local tier = resolveLevelByReputation(profile.reputation)
     local bank = getMoney(source, 'bank')
     local cash = getMoney(source, 'cash')
+    local blackMoney = getMoney(source, 'black_money')
     local imageBaseUrl = resolveInventoryImageBaseUrl()
     local pendingDeliveries = getPendingDeliveryCount(citizenid)
 
@@ -620,6 +685,7 @@ local function buildSnapshot(source, citizenid)
             discountPercent = tier.discountPercent,
             bank = bank,
             cash = cash,
+            black_money = blackMoney,
             balance = bank + cash,
             pendingDeliveries = pendingDeliveries
         },
@@ -1048,8 +1114,10 @@ lib.callback.register('f4:blackmarket:server:purchase', function(source, payload
         )
     end
 
-    local paymentOk, paymentAccount = takeSmartPayment(source, totalPrice)
+    local paymentMethod = type(payload.paymentMethod) == 'string' and payload.paymentMethod or nil
+    local paymentOk, paymentAccount = takeSmartPayment(source, totalPrice, paymentMethod)
     if not paymentOk or not paymentAccount then
+        local fundsMsg = paymentMethod == 'black_money' and 'Insufficient black money.' or 'Insufficient funds in bank and cash.'
         return failPurchase(
             source,
             citizenid,
@@ -1058,7 +1126,7 @@ lib.callback.register('f4:blackmarket:server:purchase', function(source, payload
             unitPrice,
             totalPrice,
             'insufficient_funds',
-            'Insufficient funds in bank and cash.'
+            fundsMsg
         )
     end
 
@@ -1205,9 +1273,11 @@ lib.callback.register('f4:blackmarket:server:batchPurchase', function(source, pa
     end
 
     -- Phase 2: Take payment for grand total at once
-    local paymentOk, paymentAccount = takeSmartPayment(source, grandTotal)
+    local paymentMethod = type(payload.paymentMethod) == 'string' and payload.paymentMethod or nil
+    local paymentOk, paymentAccount = takeSmartPayment(source, grandTotal, paymentMethod)
     if not paymentOk or not paymentAccount then
-        return { success = false, message = 'Insufficient funds in bank and cash.' }
+        local fundsMsg = paymentMethod == 'black_money' and 'Insufficient black money.' or 'Insufficient funds in bank and cash.'
+        return { success = false, message = fundsMsg }
     end
 
     -- Phase 3: Queue all deliveries and log history

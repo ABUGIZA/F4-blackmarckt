@@ -6,6 +6,7 @@ interface ServerPlayerSnapshot {
 	balance?: number;
 	bank?: number;
 	cash?: number;
+	black_money?: number;
 }
 
 // Writable – populated from server snapshot (Config.Market.levels)
@@ -36,7 +37,8 @@ const baseState = writable<UserState>({
 	currentReputation: DEFAULT_REPUTATION,
 	currentLevel: 0,
 	discountPercent: 0,
-	balance: 0
+	balance: 0,
+	blackMoney: 0
 });
 
 export const userState = derived([baseState, serverLevels], ([$baseState, $levels]): UserViewState => {
@@ -55,6 +57,7 @@ export const userState = derived([baseState, serverLevels], ([$baseState, $level
 		currentLevel: currentTier.level,
 		discountPercent: currentTier.discountPercent,
 		balance: $baseState.balance,
+		blackMoney: $baseState.blackMoney,
 		progress: {
 			currentLevelMinReputation: currentMin,
 			nextLevelMinReputation: nextMin,
@@ -92,11 +95,13 @@ export const syncUserStateFromServer = (snapshot: ServerPlayerSnapshot) => {
 	const normalizedReputation = Math.max(0, Math.trunc(snapshot.reputation ?? DEFAULT_REPUTATION));
 	const resolvedBalance =
 		typeof snapshot.balance === 'number' ? snapshot.balance : (snapshot.bank ?? 0) + (snapshot.cash ?? 0);
+	const resolvedBlackMoney = Math.max(0, Math.trunc(snapshot.black_money ?? 0));
 
 	baseState.update((state) => ({
 		...state,
 		currentReputation: normalizedReputation,
-		balance: Math.max(0, Math.trunc(resolvedBalance))
+		balance: Math.max(0, Math.trunc(resolvedBalance)),
+		blackMoney: resolvedBlackMoney
 	}));
 };
 
@@ -105,6 +110,7 @@ export const resetUserState = () => {
 		currentReputation: DEFAULT_REPUTATION,
 		currentLevel: 0,
 		discountPercent: 0,
-		balance: 0
+		balance: 0,
+		blackMoney: 0
 	});
 };

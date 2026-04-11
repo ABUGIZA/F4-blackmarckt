@@ -10,10 +10,12 @@
 		finalPrice: number;
 		reputationDiscountPercent: number;
 		userLevel: number;
+		userBalance: number;
+		userBlackMoney: number;
 		marketOpen: boolean;
 		offerSecondsRemaining: number | null;
 		onClose: () => void;
-		onBuy: () => void;
+		onBuy: (paymentMethod: 'normal' | 'black_money') => void;
 		onAddToCart: (productId: string) => void;
 	}
 
@@ -23,12 +25,16 @@
 		finalPrice,
 		reputationDiscountPercent,
 		userLevel,
+		userBalance,
+		userBlackMoney,
 		marketOpen,
 		offerSecondsRemaining,
 		onClose,
 		onBuy,
 		onAddToCart,
 	}: Props = $props();
+
+	let paymentMethod = $state<'normal' | 'black_money'>('normal');
 
 	const formatPrice = (value: number) => `$${value.toLocaleString("en-US")}`;
 	const isLocked = (requiredLevel: number, currentLevel: number) =>
@@ -254,37 +260,57 @@
 
 				{#snippet footer()}
 					<div class="modal-footer">
-						<button class="btn-cancel" onclick={onClose}
-							>ABORT</button
-						>
-						<button
-							class="btn-secondary"
-							onclick={() => product && onAddToCart(product.id)}
-							disabled={isLocked(
-								product.requiredLevel,
-								userLevel,
-							) || !marketOpen}
-						>
-							ADD TO CART
-						</button>
-						<button
-							class="btn-confirm"
-							onclick={onBuy}
-							disabled={isLocked(
-								product.requiredLevel,
-								userLevel,
-							) || !marketOpen}
-						>
-							<span class="btn-text">CONFIRM ACQUISITION</span>
-							<svg
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="3"
+						<div class="modal-payment-selector">
+							<button
+								class="modal-pay-opt"
+								class:active={paymentMethod === 'normal'}
+								onclick={() => (paymentMethod = 'normal')}
 							>
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg>
-						</button>
+								<span class="modal-pay-name">Cash / Bank</span>
+								<span class="modal-pay-bal">${userBalance.toLocaleString()}</span>
+							</button>
+							<button
+								class="modal-pay-opt bm"
+								class:active={paymentMethod === 'black_money'}
+								onclick={() => (paymentMethod = 'black_money')}
+							>
+								<span class="modal-pay-name">Black Money</span>
+								<span class="modal-pay-bal">${userBlackMoney.toLocaleString()}</span>
+							</button>
+						</div>
+						<div class="modal-footer-actions">
+							<button class="btn-cancel" onclick={onClose}
+								>ABORT</button
+							>
+							<button
+								class="btn-secondary"
+								onclick={() => product && onAddToCart(product.id)}
+								disabled={isLocked(
+									product.requiredLevel,
+									userLevel,
+								) || !marketOpen}
+							>
+								ADD TO CART
+							</button>
+							<button
+								class="btn-confirm"
+								onclick={() => onBuy(paymentMethod)}
+								disabled={isLocked(
+									product.requiredLevel,
+									userLevel,
+								) || !marketOpen}
+							>
+								<span class="btn-text">CONFIRM ACQUISITION</span>
+								<svg
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="3"
+								>
+									<path d="M5 12h14M12 5l7 7-7 7" />
+								</svg>
+							</button>
+						</div>
 					</div>
 				{/snippet}
 			</ModalShell>
@@ -517,9 +543,66 @@
 
 	/* Footer Actions */
 	.modal-footer {
-		display: flex;
+		display: grid;
 		gap: 1rem;
 		width: 100%;
+	}
+
+	.modal-payment-selector {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.6rem;
+	}
+
+	.modal-pay-opt {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.55rem 0.85rem;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid var(--line-soft);
+		border-radius: 3px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		color: var(--text-muted);
+	}
+
+	.modal-pay-opt:hover {
+		background: rgba(255, 255, 255, 0.04);
+		border-color: rgba(255, 255, 255, 0.12);
+	}
+
+	.modal-pay-opt.active {
+		border-color: var(--accent-primary);
+		background: rgba(24, 213, 143, 0.06);
+		color: var(--text-main);
+	}
+
+	.modal-pay-opt.bm.active {
+		border-color: #a78bfa;
+		background: rgba(139, 92, 246, 0.08);
+	}
+
+	.modal-pay-name {
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.modal-pay-bal {
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: var(--accent-primary);
+	}
+
+	.modal-pay-opt.bm .modal-pay-bal {
+		color: #a78bfa;
+	}
+
+	.modal-footer-actions {
+		display: flex;
+		gap: 1rem;
 		justify-content: flex-end;
 	}
 

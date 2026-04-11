@@ -1,1 +1,5 @@
-<!-- This page redirects to /market via +page.ts -->
+<script lang="ts">
+  import MarketPage from './market/+page.svelte';
+</script>
+
+<MarketPage />

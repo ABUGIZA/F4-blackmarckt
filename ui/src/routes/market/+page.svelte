@@ -237,7 +237,7 @@
     closeProduct();
   };
 
-  const handleBuySelectedProduct = async () => {
+  const handleBuySelectedProduct = async (paymentMethod: 'normal' | 'black_money' = 'normal') => {
     if (!selectedProduct) return;
 
     const product = selectedProduct;
@@ -253,6 +253,7 @@
     const response = await postNui<PurchaseResponse>("f4:blackmarket:purchase", {
       productId: product.id,
       quantity: 1,
+      paymentMethod,
     });
 
     if (!response) {
@@ -301,7 +302,7 @@
     );
   };
 
-  const handleCheckoutCart = async () => {
+  const handleCheckoutCart = async (paymentMethod: 'normal' | 'black_money' = 'normal') => {
     if (isCheckingOut || $cart.length === 0) return;
 
     // Pre-check: one global modifier on full base total (no double discounting)
@@ -319,10 +320,13 @@
       $userState.discountPercent,
     );
 
-    if ($userState.balance < grandTotal) {
+    const availableBalance = paymentMethod === 'black_money' ? $userState.blackMoney : $userState.balance;
+    const balanceLabel = paymentMethod === 'black_money' ? 'black money' : 'funds';
+
+    if (availableBalance < grandTotal) {
       pushNotification(
         "purchase_fail",
-        `Insufficient funds. Total is $${grandTotal.toLocaleString()} (base $${cartBaseTotal.toLocaleString()} - discount $${discountAmount.toLocaleString()}). You only have $${$userState.balance.toLocaleString()}.`,
+        `Insufficient ${balanceLabel}. Total is $${grandTotal.toLocaleString()} (base $${cartBaseTotal.toLocaleString()} - discount $${discountAmount.toLocaleString()}). You only have $${availableBalance.toLocaleString()}.`,
       );
       return;
     }
@@ -337,7 +341,7 @@
 
       const response = await postNui<PurchaseResponse>(
         "f4:blackmarket:batchPurchase",
-        { items: payloadItems },
+        { items: payloadItems, paymentMethod },
       );
 
       if (!response) {
@@ -458,6 +462,7 @@
             level={$userState.currentLevel}
             discountPercent={$userState.discountPercent}
             balance={$userState.balance}
+            blackMoney={$userState.blackMoney}
             progressRatio={$userState.progress.progressRatio}
             cartItemCount={$cartCount}
             onToggleCart={() => (view = "cart")}
@@ -495,6 +500,8 @@
   finalPrice={selectedFinalPrice}
   reputationDiscountPercent={$userState.discountPercent}
   userLevel={$userState.currentLevel}
+  userBalance={$userState.balance}
+  userBlackMoney={$userState.blackMoney}
   marketOpen={$marketStatus.isOpen}
   offerSecondsRemaining={selectedOfferSecondsRemaining}
   onClose={handleCloseProduct}

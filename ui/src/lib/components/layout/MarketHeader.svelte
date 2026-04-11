@@ -4,6 +4,7 @@
     level: number;
     discountPercent: number;
     balance: number;
+    blackMoney: number;
     progressRatio: number;
     cartItemCount: number;
     onToggleCart: () => void;
@@ -14,6 +15,7 @@
     level,
     discountPercent,
     balance,
+    blackMoney,
     progressRatio,
     cartItemCount,
     onToggleCart,
@@ -111,6 +113,29 @@
         </div>
       </div>
 
+      <!-- Black Money -->
+      <div class="compact-stat black-money-stat">
+        <div class="stat-meta">
+          <span class="meta-icon-wrap black-money-icon">
+            <svg
+              class="meta-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </span>
+          <span class="meta-label">BLACK MONEY</span>
+        </div>
+        <div class="stat-body">
+          <span class="stat-val black-money-val">${blackMoney.toLocaleString()}</span>
+        </div>
+      </div>
+
       <button
         type="button"
         class="integrated-cart-btn"
@@ -181,12 +206,13 @@
     background: rgba(255, 255, 255, 0.015);
     border: 1px solid var(--line-soft);
     border-radius: 4px;
-    padding: 0.6rem 1.25rem;
+    padding: 0;
     min-width: 220px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    align-items: flex-start;
+    overflow: hidden;
     transition:
       background 0.2s ease,
       border-color 0.2s ease;
@@ -240,6 +266,38 @@
     text-shadow: none;
   }
 
+  .compact-stat.black-money-stat {
+    border-color: rgba(139, 92, 246, 0.25);
+    background: rgba(139, 92, 246, 0.06);
+    box-shadow:
+      inset 0 0 0 1px rgba(139, 92, 246, 0.06),
+      0 0 16px -4px rgba(139, 92, 246, 0.12);
+  }
+
+  .compact-stat.black-money-stat:hover {
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.09);
+    box-shadow:
+      inset 0 0 0 1px rgba(139, 92, 246, 0.1),
+      0 0 24px -4px rgba(139, 92, 246, 0.2);
+  }
+
+  .black-money-icon {
+    background: rgba(139, 92, 246, 0.15) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+    color: #c4b5fd !important;
+  }
+
+  .black-money-stat .meta-label {
+    color: rgba(167, 139, 250, 0.85);
+  }
+
+
+  .stat-val.black-money-val {
+    color: #c4b5fd;
+    text-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+  }
+
   .integrated-cart-btn {
     width: 58px;
     background: rgba(255, 255, 255, 0.02);
@@ -290,26 +348,29 @@
   .stat-meta {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    opacity: 0.7;
+    gap: 0.35rem;
+    opacity: 0.75;
+    width: 100%;
+    padding: 0.45rem 0.75rem;
   }
 
   .meta-icon {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     position: relative;
     z-index: 1;
   }
 
   .meta-icon-wrap {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     display: grid;
     place-items: center;
-    border-radius: 3px;
+    border-radius: 2px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
     color: var(--accent-primary);
+    flex-shrink: 0;
   }
 
   .meta-label {
@@ -324,8 +385,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    width: 100%;
-    justify-content: flex-start;
+    padding: 0.5rem 0.75rem 0.6rem;
   }
 
   .stat-val {

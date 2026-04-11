@@ -34,9 +34,13 @@ Config.InventoryImages = {
 }
 
 Config.Payment = {
-    priority = { 'bank', 'cash' },
+    priority = { 'bank', 'cash', 'black_money' },
     reason = 'blackmarket-purchase',
     refundReason = 'blackmarket-refund'
+}
+
+Config.BlackMoney = {
+    item = 'black_money', -- Item name in ox_inventory
 }
 
 Config.Market = {
